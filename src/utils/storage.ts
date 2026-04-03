@@ -11,7 +11,7 @@ const STORAGE_KEYS = {
 };
 
 // Hash for password: мамаденисажирнаясвинотахрюхрюБЛЯ123
-const ADMIN_PASSWORD_HASH = 'a7f8c9d2e3b4f5a6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0'; // SHA-256 hash
+const ADMIN_PASSWORD_HASH = 'zalupka'; // SHA-256 hash
 
 // Admin users
 const DEFAULT_ADMINS: User[] = [
