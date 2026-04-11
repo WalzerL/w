@@ -99,8 +99,14 @@ export function LoginDialog({ isOpen, onClose, onLogin, onRegister }: LoginDialo
       return;
     }
 
-    if (registerPassword.length < 6) {
-      setError('Пароль должен быть не менее 6 символов');
+    if (registerPassword.length < 10) {
+      setError('Пароль должен быть не менее 10 символов');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[A-Z]/.test(registerPassword) || !/[a-z]/.test(registerPassword) || !/[0-9]/.test(registerPassword) || !/[^A-Za-z0-9]/.test(registerPassword)) {
+      setError('Пароль должен содержать заглавную, строчную букву, цифру и спецсимвол');
       setIsLoading(false);
       return;
     }
@@ -265,7 +271,7 @@ export function LoginDialog({ isOpen, onClose, onLogin, onRegister }: LoginDialo
                     type={showRegisterPassword ? 'text' : 'password'}
                     value={registerPassword}
                     onChange={(e) => setRegisterPassword(e.target.value)}
-                    placeholder="Минимум 6 символов"
+                    placeholder="Минимум 10 символов, Aa1!"
                     className="pl-10 pr-10"
                   />
                   <Button
@@ -299,7 +305,8 @@ export function LoginDialog({ isOpen, onClose, onLogin, onRegister }: LoginDialo
                 <p className="font-medium mb-1">Требования:</p>
                 <ul className="list-disc list-inside space-y-0.5">
                   <li>Имя: минимум 3 символа</li>
-                  <li>Пароль: минимум 6 символов</li>
+                  <li>Пароль: минимум 10 символов</li>
+                  <li>Обязательны: A-Z, a-z, 0-9 и спецсимвол</li>
                   <li>Пароли должны совпадать</li>
                 </ul>
               </div>

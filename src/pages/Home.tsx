@@ -34,22 +34,21 @@ export function Home({ user, isAdmin }: HomeProps) {
   const approvedArticlesList = articles.filter(a => a.status === 'approved');
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#1a1a1a]">
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#202122]">
       {/* Hero Section */}
-      <section className="bg-white dark:bg-[#1a1a1a] border-b border-[#C8CCD1] dark:border-[#444] py-12 md:py-16">
-        <div className="max-w-[960px] mx-auto px-4 text-center">
-          <div className="flex justify-center mb-6">
-            <div className="p-4 bg-[#3366CC]/10 rounded-full">
-              <BookOpen className="w-12 h-12 text-[#3366CC]" />
-            </div>
+      <section className="bg-white dark:bg-[#202122] border-b border-[#A2A9B1] dark:border-[#3A4048] py-10 md:py-12">
+        <div className="max-w-[1080px] mx-auto px-4 text-left">
+          <div className="flex items-center gap-3 mb-4">
+            <BookOpen className="w-8 h-8 text-[#3366CC]" />
+            <span className="text-sm uppercase tracking-wide text-[#54595D] dark:text-[#A2A9B1]">Свободная энциклопедия</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-[#202122] dark:text-white font-serif mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#202122] dark:text-[#F8F9FA] mb-3">
             Добро пожаловать в WalzerWiki
           </h1>
-          <p className="text-lg text-[#54595D] dark:text-[#aaa] mb-8 max-w-xl mx-auto">
+          <p className="text-lg text-[#54595D] dark:text-[#C8CCD1] mb-6 max-w-3xl">
             База знаний сообщества. Создавайте статьи, делитесь знаниями, отслеживайте изменения.
           </p>
-          <div className="flex justify-center mb-6">
+          <div className="mb-6 max-w-2xl">
             <SearchBar 
               onSelect={handleArticleSelect}
               placeholder="Поиск по статьям..."
@@ -65,7 +64,7 @@ export function Home({ user, isAdmin }: HomeProps) {
               Создать статью
             </Button>
           ) : (
-            <p className="text-sm text-[#54595D] dark:text-[#aaa]">
+            <p className="text-sm text-[#54595D] dark:text-[#C8CCD1]">
               <Button variant="link" onClick={() => navigate('/')} className="text-[#3366CC]">
                 Войдите
               </Button>
@@ -81,7 +80,7 @@ export function Home({ user, isAdmin }: HomeProps) {
 
       {/* Pending Notice */}
       {showPending && (
-        <section className="max-w-[960px] mx-auto px-4 pt-8">
+        <section className="max-w-[1080px] mx-auto px-4 pt-8">
           <Alert className="bg-[#00AF89]/10 border-[#00AF89]/30">
             <CheckCircle className="w-4 h-4 text-[#00AF89]" />
             <AlertDescription className="text-[#00AF89]">
@@ -92,10 +91,10 @@ export function Home({ user, isAdmin }: HomeProps) {
       )}
 
       {/* Main Content */}
-      <section className="max-w-[960px] mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <section className="max-w-[1080px] mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Articles Column */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-8 space-y-6">
             {/* Recent Articles */}
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -118,9 +117,9 @@ export function Home({ user, isAdmin }: HomeProps) {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-white dark:bg-[#2a2a2a] rounded-lg border border-[#C8CCD1] dark:border-[#444]">
+                <div className="text-center py-12 bg-white dark:bg-[#2A2F36] rounded-lg border border-[#C8CCD1] dark:border-[#3A4048]">
                   <BookOpen className="w-12 h-12 text-[#C8CCD1] mx-auto mb-4" />
-                  <p className="text-[#54595D] dark:text-[#aaa]">Пока нет статей</p>
+                  <p className="text-[#54595D] dark:text-[#C8CCD1]">Пока нет статей</p>
                   {user && (
                     <Button
                       onClick={() => navigate('/edit')}
@@ -152,9 +151,9 @@ export function Home({ user, isAdmin }: HomeProps) {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="lg:col-span-4 space-y-6">
             {/* Categories */}
-            <div className="bg-white dark:bg-[#2a2a2a] border border-[#C8CCD1] dark:border-[#444] rounded-md p-4">
+            <div className="bg-white dark:bg-[#2A2F36] border border-[#C8CCD1] dark:border-[#3A4048] rounded-md p-4">
               <h3 className="font-semibold text-[#202122] dark:text-white mb-3 flex items-center gap-2">
                 <Folder className="w-4 h-4 text-[#72777D]" />
                 Категории
@@ -172,20 +171,20 @@ export function Home({ user, isAdmin }: HomeProps) {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-[#54595D] dark:text-[#aaa]">Пока нет категорий</p>
+                <p className="text-sm text-[#54595D] dark:text-[#C8CCD1]">Пока нет категорий</p>
               )}
             </div>
 
             {/* Stats */}
-            <div className="bg-white dark:bg-[#2a2a2a] border border-[#C8CCD1] dark:border-[#444] rounded-md p-4">
+            <div className="bg-white dark:bg-[#2A2F36] border border-[#C8CCD1] dark:border-[#3A4048] rounded-md p-4">
               <h3 className="font-semibold text-[#202122] dark:text-white mb-3">Статистика</h3>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#54595D] dark:text-[#aaa]">Всего статей:</span>
+                  <span className="text-[#54595D] dark:text-[#C8CCD1]">Всего статей:</span>
                   <span className="font-medium">{approvedArticlesList.length}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#54595D] dark:text-[#aaa]">Категорий:</span>
+                  <span className="text-[#54595D] dark:text-[#C8CCD1]">Категорий:</span>
                   <span className="font-medium">{categories.length}</span>
                 </div>
               </div>
@@ -193,7 +192,7 @@ export function Home({ user, isAdmin }: HomeProps) {
 
             {/* User Info */}
             {user && (
-              <div className="bg-white dark:bg-[#2a2a2a] border border-[#C8CCD1] dark:border-[#444] rounded-md p-4">
+              <div className="bg-white dark:bg-[#2A2F36] border border-[#C8CCD1] dark:border-[#3A4048] rounded-md p-4">
                 <h3 className="font-semibold text-[#202122] dark:text-white mb-3 flex items-center gap-2">
                   <UserIcon className="w-4 h-4 text-[#72777D]" />
                   Вы вошли как
@@ -204,7 +203,7 @@ export function Home({ user, isAdmin }: HomeProps) {
                   </div>
                   <div>
                     <p className="font-medium">{user.username}</p>
-                    <p className="text-sm text-[#54595D] dark:text-[#aaa]">
+                    <p className="text-sm text-[#54595D] dark:text-[#C8CCD1]">
                       {isAdmin ? (
                         <span className="flex items-center gap-1">
                           <Shield className="w-3 h-3 text-[#3366CC]" />
@@ -218,9 +217,9 @@ export function Home({ user, isAdmin }: HomeProps) {
             )}
 
             {/* Info */}
-            <div className="bg-[#F8F9FA] dark:bg-[#2a2a2a] border border-[#C8CCD1] dark:border-[#444] rounded-md p-4">
+            <div className="bg-[#F8F9FA] dark:bg-[#2A2F36] border border-[#C8CCD1] dark:border-[#3A4048] rounded-md p-4">
               <h3 className="font-semibold text-[#202122] dark:text-white mb-2">О проекте</h3>
-              <p className="text-sm text-[#54595D] dark:text-[#aaa]">
+              <p className="text-sm text-[#54595D] dark:text-[#C8CCD1]">
                 WalzerWiki — платформа для создания и управления базой знаний. 
                 Каждый пользователь имеет свой аккаунт с историей изменений.
               </p>

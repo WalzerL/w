@@ -16,7 +16,7 @@ function App() {
 
   useEffect(() => {
     // Initialize localStorage with default data
-    initializeStorage();
+    void initializeStorage();
     
     // Load site settings
     const settings = getSettings();

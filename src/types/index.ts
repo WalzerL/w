@@ -29,6 +29,8 @@ export interface User {
   email?: string;
   isAdmin: boolean;
   passwordHash: string;
+  passwordSalt?: string;
+  passwordAlgo?: 'sha256' | 'pbkdf2';
   createdAt: number;
   avatar?: string;
 }
