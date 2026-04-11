@@ -102,8 +102,8 @@ export function AdminPage({ isAdmin }: AdminPageProps) {
       return;
     }
 
-    if (newUserPassword.length < 6) {
-      showMessage('Пароль должен быть не менее 6 символов', true);
+    if (newUserPassword.length < 10) {
+      showMessage('Пароль должен быть не менее 10 символов', true);
       return;
     }
 

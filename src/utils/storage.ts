@@ -1,6 +1,7 @@
 // LocalStorage management utilities
 
 import type { Article, User, SiteSettings, UploadedFile } from '@/types';
+import { generateSalt, hashPassword, sha256, verifyPasswordHash } from '@/utils/crypto';
 
 const STORAGE_KEYS = {
   ARTICLES: 'walzerwiki_articles',
@@ -10,28 +11,91 @@ const STORAGE_KEYS = {
   FILES: 'walzerwiki_files',
 };
 
-// Hash for password: мамаденисажирнаясвинотахрюхрюБЛЯ123
-const ADMIN_PASSWORD_HASH = 'zalupka'; // SHA-256 hash
-
-// Admin users
-const DEFAULT_ADMINS: User[] = [
+const DEFAULT_ADMIN_CREDENTIALS = [
   {
     id: 'admin_uofist',
     username: 'uofist',
     email: 'uofist@walzerwiki.local',
-    isAdmin: true,
-    passwordHash: ADMIN_PASSWORD_HASH,
-    createdAt: new Date('2025-04-03').getTime(),
+    password: 'DENisMoMiSSSFATTPIGOINKOINK5680!!',
   },
   {
     id: 'admin_lemonov',
     username: 'lemonov',
     email: 'lemonov@walzerwiki.local',
-    isAdmin: true,
-    passwordHash: ADMIN_PASSWORD_HASH,
-    createdAt: new Date('2025-04-03').getTime(),
+    password: 'DENisMoMiSSSFATTPIGOINKOINK5680!!',
   },
-];
+] as const;
+
+type SessionRecord = {
+  userId: string;
+};
+
+async function buildDefaultAdmins(): Promise<User[]> {
+  const users: User[] = [];
+
+  for (const admin of DEFAULT_ADMIN_CREDENTIALS) {
+    const passwordSalt = generateSalt();
+    const passwordHash = await hashPassword(admin.password, passwordSalt);
+
+    users.push({
+      id: admin.id,
+      username: admin.username,
+      email: admin.email,
+      isAdmin: true,
+      passwordHash,
+      passwordSalt,
+      passwordAlgo: 'pbkdf2',
+      createdAt: new Date('2025-04-03').getTime(),
+    });
+  }
+
+  return users;
+}
+
+
+async function syncDefaultAdminCredentials(): Promise<void> {
+  const users = getUsers();
+  if (!users.length) return;
+
+  let changed = false;
+  const updatedUsers = [...users];
+
+  for (const admin of DEFAULT_ADMIN_CREDENTIALS) {
+    const userIndex = updatedUsers.findIndex((u) => u.id === admin.id);
+    const passwordSalt = generateSalt();
+    const passwordHash = await hashPassword(admin.password, passwordSalt);
+
+    if (userIndex >= 0) {
+      updatedUsers[userIndex] = {
+        ...updatedUsers[userIndex],
+        username: admin.username,
+        email: admin.email,
+        isAdmin: true,
+        passwordHash,
+        passwordSalt,
+        passwordAlgo: 'pbkdf2',
+      };
+      changed = true;
+      continue;
+    }
+
+    updatedUsers.push({
+      id: admin.id,
+      username: admin.username,
+      email: admin.email,
+      isAdmin: true,
+      passwordHash,
+      passwordSalt,
+      passwordAlgo: 'pbkdf2',
+      createdAt: new Date('2025-04-03').getTime(),
+    });
+    changed = true;
+  }
+
+  if (changed) {
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+  }
+}
 
 const DEFAULT_SETTINGS: SiteSettings = {
   siteName: 'WalzerWiki',
@@ -286,10 +350,13 @@ WalzerWiki использует систему аутентификации с �
 ];
 
 // Initialize storage with default data
-export function initializeStorage(): void {
+export async function initializeStorage(): Promise<void> {
   if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(DEFAULT_ADMINS));
+    const defaultAdmins = await buildDefaultAdmins();
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(defaultAdmins));
   }
+
+  await syncDefaultAdminCredentials();
   if (!localStorage.getItem(STORAGE_KEYS.ARTICLES)) {
     localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(DEMO_ARTICLES));
   }
@@ -384,31 +451,65 @@ export function deleteUser(id: string): void {
 }
 
 export async function verifyPassword(password: string): Promise<User | null> {
-  const { sha256 } = await import('./crypto');
-  const passwordHash = await sha256(password);
   const users = getUsers();
-  return users.find(u => u.passwordHash === passwordHash) || null;
+
+  for (const user of users) {
+    if (user.passwordAlgo === 'pbkdf2' && user.passwordSalt) {
+      const isValid = await verifyPasswordHash(password, user.passwordSalt, user.passwordHash);
+      if (isValid) return user;
+      continue;
+    }
+
+    const legacyHash = await sha256(password);
+    if (user.passwordHash === legacyHash) {
+      const passwordSalt = generateSalt();
+      const passwordHash = await hashPassword(password, passwordSalt);
+      const migratedUser: User = { ...user, passwordHash, passwordSalt, passwordAlgo: 'pbkdf2' };
+      saveUser(migratedUser);
+      return migratedUser;
+    }
+  }
+
+  return null;
 }
 
 export async function verifyUserCredentials(username: string, password: string): Promise<User | null> {
-  const { sha256 } = await import('./crypto');
-  const passwordHash = await sha256(password);
-  const users = getUsers();
-  return users.find(u => 
-    u.username.toLowerCase() === username.toLowerCase() && 
-    u.passwordHash === passwordHash
-  ) || null;
+  const user = getUserByUsername(username);
+  if (!user) return null;
+
+  if (user.passwordAlgo === 'pbkdf2' && user.passwordSalt) {
+    const isValid = await verifyPasswordHash(password, user.passwordSalt, user.passwordHash);
+    return isValid ? user : null;
+  }
+
+  const legacyHash = await sha256(password);
+  if (user.passwordHash !== legacyHash) {
+    return null;
+  }
+
+  const passwordSalt = generateSalt();
+  const passwordHash = await hashPassword(password, passwordSalt);
+  const migratedUser: User = { ...user, passwordHash, passwordSalt, passwordAlgo: 'pbkdf2' };
+  saveUser(migratedUser);
+  return migratedUser;
 }
 
 // Current session
 export function getCurrentUser(): User | null {
   const data = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-  return data ? JSON.parse(data) : null;
+  if (!data) return null;
+
+  const session: SessionRecord = JSON.parse(data);
+  if (!session?.userId) return null;
+
+  const actualUser = getUserById(session.userId);
+  return actualUser;
 }
 
 export function setCurrentUser(user: User | null): void {
   if (user) {
-    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+    const session: SessionRecord = { userId: user.id };
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(session));
   } else {
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
   }
