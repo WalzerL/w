@@ -2192,7 +2192,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.error(f"Ошибка при обработке update {update}: {context.error}", exc_info=context.error)
 
 # ================== Настройки администраторов ==================
-ADMINS = [8520739067]
+ADMINS = [1689329449, 8789477270]
 ADMIN_PASSWORD = "W57LZ00Ylemonov"
 
 def is_admin(user_id):
